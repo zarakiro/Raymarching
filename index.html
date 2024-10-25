@@ -5,7 +5,7 @@
         <title>Homework 1 Matthieu MOMBERT</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="../style.css" />
     </head>
     <body class="open-sans-normal">
         <div>
@@ -13,10 +13,13 @@
             <h2 class="open-sans-bold" style="text-align: center">Ray Marching</h2>
             <h3 class="open-sans-bold" style="text-align: center">Matthieu MOMBERT</h3>
         </div>
-        <!-- <ul style="display: flex; justify-content: space-between">
-            <li><a href="../example08/index.html">Prev</a></li>
-            <li><a href="../example10/index.html">Next</a></li>
-        </ul> -->
+        <ul style="display: flex; justify-content: space-between">
+            <button id="simpleBackground"class="button-40">Fond Simple</button>
+            <button id="realisticBackground"class="button-40">Fond Réaliste</button>   
+            <button id="resetViewButton"class="button-40">Reset View</button>
+            <button id="OrbitButton" class="button-40">Changer les orbites</button>
+ 
+        </ul>
         <p style="text-align: center; font-size: 2rem" class="open-sans-bold">
             <span id="fps">60</span> <span>FPS</span>
         </p>
@@ -27,6 +30,7 @@
                 height="600"
                 style="width: 100%; margin: 0 auto"
             ></canvas>
+            
         </div>
 
         <script src="script.js" type="module"></script>
