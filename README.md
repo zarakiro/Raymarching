@@ -1,26 +1,26 @@
-# Raymarching
-A Raymarching Project for AICG class
-
-
-
-# Simulation du Système Solaire
+# Raymarching Solar System for AICG class
 
 ## Description
-Ce projet est une simulation interactive du système solaire utilisant des shaders GLSL. Il permet aux utilisateurs de visualiser les différentes planètes en orbite autour du soleil et d'interagir avec le système à l'aide de la souris pour zoomer et se déplacer entre les planètes.
+This project is an interactive simulation of the solar system using raymarching techniques. Users can explore the solar system by moving the camera view with the mouse and zooming in and out. The simulation features four buttons that enhance the user experience:
 
-## Fonctionnalités
-- Visualisation réaliste du système solaire avec le soleil et les planètes.
-- Interaction avec la scène : zoomer et se déplacer entre les planètes en utilisant la souris.
-- Textures détaillées pour chaque planète.
-- Rotation des planètes autour du soleil, simulant leur mouvement orbital.
-- Affichage des étoiles de fond et de l'effet de nébuleuse pour enrichir l'expérience visuelle.
+- **Simple Background:** Switches to a simplified galaxy background.
+- **Realistic Background:** Offers a more detailed background but may cause a drop in FPS; use with caution.
+- **Reset View:** Returns the camera to its original position.
+- **Change Orbits:** Extrapolates the orbits of each planet for a more schematic representation.
 
-## Prérequis
-- Avoir un navigateur moderne prenant en charge WebGL.
-- Une connexion Internet pour charger les textures (si elles ne sont pas hébergées localement).
+## Features
+- Interactive exploration of the solar system with smooth camera movement.
+- Detailed textures and models for each planet.
+- Background options to enhance visual experience.
+- Camera controls for zooming and panning.
+- Responsive design that works in modern web browsers.
+
+## Prerequisites
+- A modern web browser that supports WebGL.
+- Internet connection (if using online resources for textures).
 
 ## Installation
-1. **Clonez le dépôt :**
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/votre-nom-utilisateur/nom-du-repo.git
-   cd nom-du-repo
+   git clone https://github.com/your-username/repo-name.git
+   cd repo-name
