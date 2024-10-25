@@ -81,16 +81,16 @@ async function main() {
   const gl = canvas.getContext("webgl2");
   if (!gl) alert("Could not initialize WebGL Context.");
 
-  const earthTexture = loadTexture(gl, "textures/earth_texture.jpg");
-  const marsTexture = loadTexture(gl, "textures/mars_texture.jpg");
-  const mercureTexture = loadTexture(gl, "textures/mercury_texture.jpg");
-  const jupiterTexture = loadTexture(gl, "textures/jupiter_texture.jpg");
-  const neptuneTexture = loadTexture(gl, "textures/neptune_texture.jpg");
-  const uranusTexture = loadTexture(gl, "textures/uranus_texture.jpg");
-  const venusTexture = loadTexture(gl, "textures/venus_texture.jpg");
-  const saturnTexture = loadTexture(gl, "textures/saturn_texture.jpg");
-  const sunTexture = loadTexture(gl, "textures/sun_texture.jpg");
-  const starsTexture = loadTexture(gl, "textures/stars_texture.jpg");
+  const earthTexture = loadTexture(gl, "/textures/earth_texture.jpg");
+  const marsTexture = loadTexture(gl, "/textures/mars_texture.jpg");
+  const mercureTexture = loadTexture(gl, "/textures/mercury_texture.jpg");
+  const jupiterTexture = loadTexture(gl, "/textures/jupiter_texture.jpg");
+  const neptuneTexture = loadTexture(gl, "/textures/neptune_texture.jpg");
+  const uranusTexture = loadTexture(gl, "/textures/uranus_texture.jpg");
+  const venusTexture = loadTexture(gl, "/textures/venus_texture.jpg");
+  const saturnTexture = loadTexture(gl, "/textures/saturn_texture.jpg");
+  const sunTexture = loadTexture(gl, "/textures/sun_texture.jpg");
+  const starsTexture = loadTexture(gl, "/textures/stars_texture.jpg");
 
   const mouse = {
     x: 0,
@@ -108,6 +108,33 @@ async function main() {
     zoomLevel = Math.min(Math.max(0.1, zoomLevel + delta), 5.0); // Limiter le zoom entre 0.5x et 5x
   });
 
+  let starMode=0;
+  document.getElementById('simpleBackground').addEventListener('click', () => {
+    starMode = 0;
+    gl.uniform1i(gl.getUniformLocation(program, 'u_starMode'), starMode);
+  });
+  document.getElementById('realisticBackground').addEventListener('click', () => {
+      starMode = 1;
+      gl.uniform1i(gl.getUniformLocation(program, 'u_starMode'), starMode);
+  });
+
+  let orbitMode=false;
+  document.getElementById('OrbitButton').addEventListener('click', () => {
+    orbitMode = !orbitMode;
+    gl.uniform1i(gl.getUniformLocation(program, 'u_orbit'), orbitMode);
+  });
+
+
+  const initialMouseX = 0.0;
+  const initialMouseY = 0.0;
+  const initialZoom = 1.0;
+  function resetView() {// Fonction pour réinitialiser la vue et le zoom
+      mouse.x = initialMouseX;
+      mouse.y = initialMouseY;
+      zoomLevel = initialZoom;
+  }
+  // Ajouter l'écouteur d'événements au bouton
+  document.getElementById("resetViewButton").addEventListener("click", resetView);
 
   const vertShader = createShader(gl, gl.VERTEX_SHADER, await readShader("vert")); // prettier-ignore
   const fragShader = createShader(gl, gl.FRAGMENT_SHADER, await readShader("frag")); // prettier-ignore
@@ -121,6 +148,7 @@ async function main() {
   const u_dt = gl.getUniformLocation(program, "u_dt");
   const u_mouse = gl.getUniformLocation(program, "u_mouse");
   const u_zoom = gl.getUniformLocation(program, "u_zoom");
+  const u_starModeLocation = gl.getUniformLocation(program, 'u_starMode');
 
   const u_texture_earth = gl.getUniformLocation(program, "u_texture_earth");
   const u_texture_mars = gl.getUniformLocation(program, "u_texture_mars");
@@ -182,6 +210,7 @@ async function main() {
     gl.uniform1f(u_dt, time.dt());
     gl.uniform2f(u_mouse,mouse.x,mouse.y);
     gl.uniform1f(u_zoom, zoomLevel);
+    gl.uniform1i(u_starModeLocation, starMode); //Pour changer le fond
     //console.log("coordonnée souris en X:",mouse.x,);
     //console.log("coordonnée souris en Y:",mouse.y,);
 
