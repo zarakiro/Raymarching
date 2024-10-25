@@ -81,16 +81,16 @@ async function main() {
   const gl = canvas.getContext("webgl2");
   if (!gl) alert("Could not initialize WebGL Context.");
 
-  const earthTexture = loadTexture(gl, "/textures/earth_texture.jpg");
-  const marsTexture = loadTexture(gl, "/textures/mars_texture.jpg");
-  const mercureTexture = loadTexture(gl, "/textures/mercury_texture.jpg");
-  const jupiterTexture = loadTexture(gl, "/textures/jupiter_texture.jpg");
-  const neptuneTexture = loadTexture(gl, "/textures/neptune_texture.jpg");
-  const uranusTexture = loadTexture(gl, "/textures/uranus_texture.jpg");
-  const venusTexture = loadTexture(gl, "/textures/venus_texture.jpg");
-  const saturnTexture = loadTexture(gl, "/textures/saturn_texture.jpg");
-  const sunTexture = loadTexture(gl, "/textures/sun_texture.jpg");
-  const starsTexture = loadTexture(gl, "/textures/stars_texture.jpg");
+  const earthTexture = loadTexture(gl, "textures/earth_texture.jpg");
+  const marsTexture = loadTexture(gl, "textures/mars_texture.jpg");
+  const mercureTexture = loadTexture(gl, "textures/mercury_texture.jpg");
+  const jupiterTexture = loadTexture(gl, "textures/jupiter_texture.jpg");
+  const neptuneTexture = loadTexture(gl, "textures/neptune_texture.jpg");
+  const uranusTexture = loadTexture(gl, "textures/uranus_texture.jpg");
+  const venusTexture = loadTexture(gl, "textures/venus_texture.jpg");
+  const saturnTexture = loadTexture(gl, "textures/saturn_texture.jpg");
+  const sunTexture = loadTexture(gl, "textures/sun_texture.jpg");
+  const starsTexture = loadTexture(gl, "textures/stars_texture.jpg");
 
   const mouse = {
     x: 0,
