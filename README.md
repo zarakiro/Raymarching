@@ -2,8 +2,6 @@
 A Raymarching Project for AICG class
 
 
-## Discover the Solar system made only with Raymarching
-
 
 # Simulation du Système Solaire
 
