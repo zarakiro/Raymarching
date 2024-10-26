@@ -19,8 +19,4 @@ This project is an interactive simulation of the solar system using raymarching 
 - A modern web browser that supports WebGL.
 - Internet connection (if using online resources for textures).
 
-## Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-username/repo-name.git
-   cd repo-name
+## Use the following link to see the project : https://zarakiro.github.io/Raymarching/
