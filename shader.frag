@@ -1,45 +1,47 @@
 #version 300 es
 precision highp float;
 
-#define EPS         0.001
-#define N_MAX_STEPS 80
-#define MAX_DIST    100.0
+#define EPS         0.001               // Small epsilon for stopping condition in ray marching
+#define N_MAX_STEPS 80                  // Maximum number of steps in ray marching
+#define MAX_DIST    100.0               // Maximum ray distance (bounds the render area)
 #define PI 3.141592
-#define DEG2RAD 0.01745329251
+#define DEG2RAD 0.01745329251           // Conversion factor from degrees to radians
 
+// Settings for star field generation
 #define iterations 15   
 #define formuparam 0.53
-#define volsteps 10
-#define stepsize 0.1
-#define tile   0.850
-#define speed  0.010 
-#define brightness 0.0015
-#define darkmatter 0.300
-#define distfading 0.730
-#define saturation 0.850
+#define volsteps 10                      // Number of volume steps in star generation
+#define stepsize 0.1                     // Step size in star generation
+#define tile   0.850                     // Tiling for star field
+#define speed  0.010                     // Starfield animation speed
+#define brightness 0.0015                // Brightness of stars
+#define darkmatter 0.300                 // Dark matter factor for star field
+#define distfading 0.730                 // Distance fading effect in star field
+#define saturation 0.850                 // Saturation of star colors
 
-uniform vec2 u_resolution;
-uniform float u_time;
-uniform float u_dt;
-uniform vec2 u_mouse;
-uniform float u_zoom;
-uniform int u_starMode;
-uniform bool u_orbit;
+// Uniform variables for rendering parameters
+uniform vec2 u_resolution;              // Resolution of the output display
+uniform float u_time;                   // Elapsed time for animation
+uniform float u_dt;                     // Time delta for frame rate
+uniform vec2 u_mouse;                   // Mouse position for camera orientation
+uniform float u_zoom;                   // Zoom level
+uniform int u_starMode;                 // Mode toggle for starfield
+uniform bool u_orbit;                   // Orbit mode toggle for planetary inclination
 
+// Planet textures
+uniform sampler2D u_texture_earth;
+uniform sampler2D u_texture_mars;
+uniform sampler2D u_texture_jupiter;
+uniform sampler2D u_texture_mercury;
+uniform sampler2D u_texture_neptune;
+uniform sampler2D u_texture_saturn;
+uniform sampler2D u_texture_uranus;
+uniform sampler2D u_texture_venus;
+uniform sampler2D u_texture_sun;
+uniform sampler2D u_texture_stars;
 
-uniform sampler2D u_texture_earth;   // Texture de la Terre
-uniform sampler2D u_texture_mars;    // Texture de Mars
-uniform sampler2D u_texture_jupiter; // Texture de Jupiter
-uniform sampler2D u_texture_mercury; // Texture de Mercure
-uniform sampler2D u_texture_neptune; // Texture de Neptune
-uniform sampler2D u_texture_saturn;  // Texture de Saturn
-uniform sampler2D u_texture_uranus;  // Texture de Uranus
-uniform sampler2D u_texture_venus;   // Texture de Venus
-uniform sampler2D u_texture_sun;     // Texture du Soleil
-uniform sampler2D u_texture_stars;   // Texture des Etoiles
-
-in vec2 f_uv;
-out vec4 outColor;
+in vec2 f_uv;                           // Fragment coordinates
+out vec4 outColor;                      // Output color of the fragment
 
 
 vec3 starNest(vec3 ro, vec3 rd) {
@@ -117,14 +119,8 @@ mat3 rot3D(float ax, float ay, float az) {
         cx * sy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy
     );
 }
-mat3 rot3DX(float angle) {
-    float c = cos(angle);
-    float s = sin(angle);
-    return mat3(
-        1.0, 0.0, 0.0,
-        0.0, c, -s,
-        0.0, s, c
-    );
+vec2 sdf_orbit(vec3 p, float radius) {
+    return vec2(1.0, length(p.xz) - radius); // Orbite dans le plan XZ
 }
 vec2 sdf_scene(vec3 p) {
     vec3 sunpos = vec3( 0.0, 0.0, 0.0);
@@ -138,6 +134,7 @@ vec2 sdf_scene(vec3 p) {
     float inclination_saturn  = u_orbit == false ? 4.5 * DEG2RAD : 57.0 * DEG2RAD;
     float inclination_uranus  = u_orbit == false ? 0.8 * DEG2RAD : 10.0 * DEG2RAD;
     float inclination_neptune  = u_orbit == false ? 2.8 * DEG2RAD : 36.0 * DEG2RAD;
+
 
     // Mercure
     float a_mercury = .75; // Demi-grand axe (distance moyenne au Soleil)
