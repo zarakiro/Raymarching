@@ -1,38 +1,42 @@
+// Asynchronously reads a shader source from a given HTML element ID.
 async function readShader(id) {
   const req = await fetch(document.getElementById(id).src);
-  return await req.text();
+  return await req.text(); // Returns the shader source code as text
 }
 
+// Creates and compiles a WebGL shader
 function createShader(gl, type, src) {
-  let shader = gl.createShader(type);
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
+  let shader = gl.createShader(type); // Create a shader object based on the specified type
+  gl.shaderSource(shader, src); // Attach the shader source code
+  gl.compileShader(shader); // Compile the shader
 
   let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  if (success) return shader;
+  if (success) return shader; // Return shader if compilation is successful
 
   console.error("Could not compile WebGL Shader", gl.getShaderInfoLog(shader));
-  gl.deleteShader(shader);
+  gl.deleteShader(shader); // Clean up on failure
 }
 
+// Links two shaders into a program (vertex and fragment shaders)
 function createProgram(gl, vertShader, fragShader) {
   let program = gl.createProgram();
-  gl.attachShader(program, vertShader);
-  gl.attachShader(program, fragShader);
-  gl.linkProgram(program);
+  gl.attachShader(program, vertShader); // Attach vertex shader
+  gl.attachShader(program, fragShader); // Attach fragment shader
+  gl.linkProgram(program); // Link shaders into a complete program
 
   let success = gl.getProgramParameter(program, gl.LINK_STATUS);
-  if (success) return program;
+  if (success) return program; // Return program if linking is successful
 
   console.error("Could not Link WebGL Program", gl.getProgramInfoLog(program));
-  gl.deleteProgram(program);
+  gl.deleteProgram(program); // Clean up on failure
 }
 
+// Loads a texture from a specified URL, sets a default pixel until the image loads
 function loadTexture(gl, url) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
-  // Mettre une image par défaut (1x1 pixel) en attendant le chargement de la vraie image
+  // Placeholder image (1x1 white pixel) used until the real image loads
   const level = 0;
   const internalFormat = gl.RGBA;
   const width = 1;
@@ -40,16 +44,16 @@ function loadTexture(gl, url) {
   const border = 0;
   const srcFormat = gl.RGBA;
   const srcType = gl.UNSIGNED_BYTE;
-  const pixel = new Uint8Array([255, 255, 255, 255]); // Pixel blanc
+  const pixel = new Uint8Array([255, 255, 255, 255]); // Default to white pixel
   gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
 
-  // Charger l'image réelle
+  // Load the actual image
   const image = new Image();
   image.onload = function() {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
 
-    // Générer les mips pour des textures plus petites
+    // Generate mips for better down-scaling quality
     gl.generateMipmap(gl.TEXTURE_2D);
   };
   image.src = url;
@@ -57,30 +61,33 @@ function loadTexture(gl, url) {
   return texture;
 }
 
+// Main function to initialize and start the WebGL application
 async function main() {
-  const fps = document.getElementById("fps");
+  const fps = document.getElementById("fps"); // Element to display FPS
 
   const time = {
     current_t: Date.now(),
-    dts: [1 / 60],
+    dts: [1 / 60], // Array to store frame deltas
     t: 0,
 
     dt: () => time.dts[0],
     update: () => {
       const new_t = Date.now();
-      time.dts = [(new_t - time.current_t) / 1_000, ...time.dts].slice(0, 10);
+      time.dts = [(new_t - time.current_t) / 1_000, ...time.dts].slice(0, 10); // Keep last 10 frame times
       time.t += time.dt();
       time.current_t = new_t;
 
+      // Calculate average delta for FPS
       const dt = time.dts.reduce((a, dt) => a + dt, 0) / time.dts.length;
       fps.innerHTML = `${Math.round(1 / dt, 2)}`;
     },
   };
 
   const canvas = document.getElementById("canvas");
-  const gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext("webgl2"); // Initialize WebGL 2.0 context
   if (!gl) alert("Could not initialize WebGL Context.");
 
+  // Load textures for each celestial body
   const earthTexture = loadTexture(gl, "textures/earth_texture.jpg");
   const marsTexture = loadTexture(gl, "textures/mars_texture.jpg");
   const mercureTexture = loadTexture(gl, "textures/mercury_texture.jpg");
@@ -92,54 +99,56 @@ async function main() {
   const sunTexture = loadTexture(gl, "textures/sun_texture.jpg");
   const starsTexture = loadTexture(gl, "textures/stars_texture.jpg");
 
-  const mouse = {
-    x: 0,
-    y: 0,
-  };
+  // Mouse object to track cursor position
+  const mouse = { x: 0, y: 0 };
   canvas.addEventListener("mousemove", (event) => {
     const rect = canvas.getBoundingClientRect();
     mouse.x = (event.clientX - rect.left) / canvas.width;
     mouse.y = (event.clientY - rect.top) / canvas.height;
-  }); 
-
-  let zoomLevel=1.0;
-  canvas.addEventListener("wheel", (event) => {
-    const delta = event.deltaY * -0.001; // Ajuster la sensibilité du zoom
-    zoomLevel = Math.min(Math.max(0.1, zoomLevel + delta), 5.0); // Limiter le zoom entre 0.5x et 5x
   });
 
-  let starMode=0;
+  // Zoom functionality
+  let zoomLevel = 1.0;
+  canvas.addEventListener("wheel", (event) => {
+    const delta = event.deltaY * -0.001; // Adjust zoom sensitivity
+    zoomLevel = Math.min(Math.max(0.1, zoomLevel + delta), 5.0); // Limit zoom between 0.1x and 5x
+  });
+
+  // Background modes for stars
+  let starMode = 0;
   document.getElementById('simpleBackground').addEventListener('click', () => {
     starMode = 0;
     gl.uniform1i(gl.getUniformLocation(program, 'u_starMode'), starMode);
   });
   document.getElementById('realisticBackground').addEventListener('click', () => {
-      starMode = 1;
-      gl.uniform1i(gl.getUniformLocation(program, 'u_starMode'), starMode);
+    starMode = 1;
+    gl.uniform1i(gl.getUniformLocation(program, 'u_starMode'), starMode);
   });
 
-  let orbitMode=false;
+  // Orbit mode toggle
+  let orbitMode = false;
   document.getElementById('OrbitButton').addEventListener('click', () => {
     orbitMode = !orbitMode;
     gl.uniform1i(gl.getUniformLocation(program, 'u_orbit'), orbitMode);
   });
 
-
+  // Reset view and zoom to initial state
   const initialMouseX = 0.0;
   const initialMouseY = 0.0;
   const initialZoom = 1.0;
-  function resetView() {// Fonction pour réinitialiser la vue et le zoom
-      mouse.x = initialMouseX;
-      mouse.y = initialMouseY;
-      zoomLevel = initialZoom;
+  function resetView() {
+    mouse.x = initialMouseX;
+    mouse.y = initialMouseY;
+    zoomLevel = initialZoom;
   }
-  // Ajouter l'écouteur d'événements au bouton
   document.getElementById("resetViewButton").addEventListener("click", resetView);
 
-  const vertShader = createShader(gl, gl.VERTEX_SHADER, await readShader("vert")); // prettier-ignore
-  const fragShader = createShader(gl, gl.FRAGMENT_SHADER, await readShader("frag")); // prettier-ignore
+  // Load shaders
+  const vertShader = createShader(gl, gl.VERTEX_SHADER, await readShader("vert"));
+  const fragShader = createShader(gl, gl.FRAGMENT_SHADER, await readShader("frag"));
   const program = createProgram(gl, vertShader, fragShader);
 
+  // Set up attribute and uniform locations
   const a_position = gl.getAttribLocation(program, "a_position");
   const a_uv = gl.getAttribLocation(program, "a_uv");
 
@@ -161,20 +170,18 @@ async function main() {
   const u_texture_sun = gl.getUniformLocation(program, "u_texture_sun");
   const u_texture_stars = gl.getUniformLocation(program, "u_texture_stars");
 
-  // prettier-ignore
+  // Vertex data for a quad
   const data = new Float32Array([
-    // x    y       u    v
-    -1.0, -1.0,   0.0, 0.0,
-     1.0, -1.0,   1.0, 0.0,
-     1.0,  1.0,   1.0, 1.0,
-    -1.0,  1.0,   0.0, 1.0,
-  ]);
-  // prettier-ignore
-  const indices = new Uint16Array([
-    0, 1, 2,
-    0, 2, 3,
+    -1.0, -1.0, 0.0, 0.0,
+    1.0, -1.0, 1.0, 0.0,
+    1.0, 1.0, 1.0, 1.0,
+    -1.0, 1.0, 0.0, 1.0,
   ]);
 
+  // Index data to draw two triangles forming a quad
+  const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+
+  // Set up vertex array and buffers
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
 
@@ -194,8 +201,7 @@ async function main() {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-
-
+  // Main render loop
   function loop() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -204,17 +210,15 @@ async function main() {
     gl.bindVertexArray(vao);
     gl.useProgram(program);
 
-    //récupérer inputs ou res de l'écran ou temps
+    // Update uniforms
     gl.uniform2f(u_resolution, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(u_time, time.t);
     gl.uniform1f(u_dt, time.dt());
-    gl.uniform2f(u_mouse,mouse.x,mouse.y);
+    gl.uniform2f(u_mouse, mouse.x, mouse.y);
     gl.uniform1f(u_zoom, zoomLevel);
-    gl.uniform1i(u_starModeLocation, starMode); //Pour changer le fond
-    //console.log("coordonnée souris en X:",mouse.x,);
-    //console.log("coordonnée souris en Y:",mouse.y,);
+    gl.uniform1i(u_starModeLocation, starMode);
 
-    //Textures de chaque planète
+    // Bind textures for each celestial object
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, earthTexture);
     gl.uniform1i(u_texture_earth, 0);
@@ -255,15 +259,14 @@ async function main() {
     gl.bindTexture(gl.TEXTURE_2D, starsTexture);
     gl.uniform1i(u_texture_stars, 9);
 
-    // fin des textures
-
+    // Draw the scene
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
     gl.bindVertexArray(null);
 
     time.update();
-    requestAnimationFrame(loop);
+    requestAnimationFrame(loop); // Repeat the loop
   }
-  requestAnimationFrame(loop);
+  requestAnimationFrame(loop); // Start the render loop
 }
 
-main();
+main(); // Run the main function
