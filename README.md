@@ -6,7 +6,7 @@ This project is an interactive simulation of the solar system using raymarching 
 - **Fond simple:** Switches to a simplified galaxy background.
 - **Fond réaliste:** Offers a more detailed background but may cause a drop in FPS; use with caution.
 - **Reset View:** Returns the camera to its original position.
-- **Change Orbits:** Extrapolates the orbits of each planet for a more schematic representation.
+- **Changer les orbites:** Extrapolates the orbits of each planet for a more schematic representation.
 
 ## Features
 - Interactive exploration of the solar system with smooth camera movement.
